@@ -89,14 +89,29 @@ class TaskBase(BaseModel):
     description: Optional[str] = None
     project_id: str
     assigned_to_user_id: Optional[str] = None
+    assigned_resource_ids: Optional[List[str]] = []
     status: str = "todo"  # todo, in_progress, completed
     priority: str = "medium"  # low, medium, high
     start_date: Optional[datetime] = None
     end_date: Optional[datetime] = None
+    expected_completion_date: Optional[datetime] = None
+    realized_completion_date: Optional[datetime] = None
     is_frozen: bool = False
 
 class TaskCreate(TaskBase):
     pass
+
+class TaskUpdate(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    assigned_to_user_id: Optional[str] = None
+    assigned_resource_ids: Optional[List[str]] = None
+    status: Optional[str] = None
+    priority: Optional[str] = None
+    start_date: Optional[datetime] = None
+    end_date: Optional[datetime] = None
+    expected_completion_date: Optional[datetime] = None
+    realized_completion_date: Optional[datetime] = None
 
 class Task(TaskBase):
     model_config = ConfigDict(extra="ignore")
