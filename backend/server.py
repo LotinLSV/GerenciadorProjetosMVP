@@ -477,10 +477,14 @@ async def create_task(task_data: TaskCreate, current_user: User = Depends(get_cu
     doc = task_obj.model_dump()
     doc['created_at'] = doc['created_at'].isoformat()
     doc['updated_at'] = doc['updated_at'].isoformat()
-    if doc['start_date']:
+    if doc.get('start_date'):
         doc['start_date'] = doc['start_date'].isoformat()
-    if doc['end_date']:
+    if doc.get('end_date'):
         doc['end_date'] = doc['end_date'].isoformat()
+    if doc.get('expected_completion_date'):
+        doc['expected_completion_date'] = doc['expected_completion_date'].isoformat()
+    if doc.get('realized_completion_date'):
+        doc['realized_completion_date'] = doc['realized_completion_date'].isoformat()
     
     await db.tasks.insert_one(doc)
     return task_obj
