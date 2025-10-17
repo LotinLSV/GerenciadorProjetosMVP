@@ -12,6 +12,7 @@ export const Sidebar = ({ user, logout, darkMode, toggleDarkMode }) => {
   const menuItems = [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
     { icon: FolderKanban, label: 'Projects', path: '/projects' },
+    { icon: CheckCircle2, label: 'Tasks', path: '/tasks' },
   ];
 
   if (user?.role === 'admin') {
