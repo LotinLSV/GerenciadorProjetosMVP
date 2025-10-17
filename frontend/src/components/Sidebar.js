@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, FolderKanban, Users, DollarSign, FileText, Network, Settings, LogOut, Moon, Sun } from 'lucide-react';
+import { LayoutDashboard, FolderKanban, Users, DollarSign, FileText, Network, Settings, LogOut, Moon, Sun, CheckCircle2 } from 'lucide-react';
 import { Button } from './ui/button';
 import { Switch } from './ui/switch';
 import { Avatar, AvatarFallback } from './ui/avatar';
