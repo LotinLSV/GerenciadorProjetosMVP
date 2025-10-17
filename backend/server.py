@@ -507,10 +507,35 @@ async def get_tasks(project_id: Optional[str] = None, current_user: User = Depen
             task['start_date'] = datetime.fromisoformat(task['start_date'])
         if task.get('end_date') and isinstance(task['end_date'], str):
             task['end_date'] = datetime.fromisoformat(task['end_date'])
+        if task.get('expected_completion_date') and isinstance(task['expected_completion_date'], str):
+            task['expected_completion_date'] = datetime.fromisoformat(task['expected_completion_date'])
+        if task.get('realized_completion_date') and isinstance(task['realized_completion_date'], str):
+            task['realized_completion_date'] = datetime.fromisoformat(task['realized_completion_date'])
     return tasks
 
+@api_router.get("/tasks/{task_id}", response_model=Task)
+async def get_task(task_id: str, current_user: User = Depends(get_current_user)):
+    task = await db.tasks.find_one({"id": task_id}, {"_id": 0})
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+    
+    if isinstance(task['created_at'], str):
+        task['created_at'] = datetime.fromisoformat(task['created_at'])
+    if isinstance(task['updated_at'], str):
+        task['updated_at'] = datetime.fromisoformat(task['updated_at'])
+    if task.get('start_date') and isinstance(task['start_date'], str):
+        task['start_date'] = datetime.fromisoformat(task['start_date'])
+    if task.get('end_date') and isinstance(task['end_date'], str):
+        task['end_date'] = datetime.fromisoformat(task['end_date'])
+    if task.get('expected_completion_date') and isinstance(task['expected_completion_date'], str):
+        task['expected_completion_date'] = datetime.fromisoformat(task['expected_completion_date'])
+    if task.get('realized_completion_date') and isinstance(task['realized_completion_date'], str):
+        task['realized_completion_date'] = datetime.fromisoformat(task['realized_completion_date'])
+    
+    return Task(**task)
+
 @api_router.put("/tasks/{task_id}", response_model=Task)
-async def update_task(task_id: str, task_data: TaskCreate, current_user: User = Depends(get_current_user)):
+async def update_task(task_id: str, task_data: TaskUpdate, current_user: User = Depends(get_current_user)):
     task = await db.tasks.find_one({"id": task_id}, {"_id": 0})
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
@@ -518,12 +543,21 @@ async def update_task(task_id: str, task_data: TaskCreate, current_user: User = 
     if task.get('is_frozen') and current_user.role == "team_member":
         raise HTTPException(status_code=403, detail="Cannot edit frozen task")
     
-    update_dict = task_data.model_dump()
+    update_dict = {k: v for k, v in task_data.model_dump(exclude_unset=True).items() if v is not None}
     update_dict['updated_at'] = datetime.now(timezone.utc).isoformat()
-    if update_dict.get('start_date'):
+    
+    if 'start_date' in update_dict and update_dict['start_date']:
         update_dict['start_date'] = update_dict['start_date'].isoformat()
-    if update_dict.get('end_date'):
+    if 'end_date' in update_dict and update_dict['end_date']:
         update_dict['end_date'] = update_dict['end_date'].isoformat()
+    if 'expected_completion_date' in update_dict and update_dict['expected_completion_date']:
+        update_dict['expected_completion_date'] = update_dict['expected_completion_date'].isoformat()
+    if 'realized_completion_date' in update_dict and update_dict['realized_completion_date']:
+        update_dict['realized_completion_date'] = update_dict['realized_completion_date'].isoformat()
+    
+    # Auto-set realized_completion_date when task is marked as completed
+    if update_dict.get('status') == 'completed' and not task.get('realized_completion_date'):
+        update_dict['realized_completion_date'] = datetime.now(timezone.utc).isoformat()
     
     result = await db.tasks.update_one(
         {"id": task_id},
@@ -539,6 +573,10 @@ async def update_task(task_id: str, task_data: TaskCreate, current_user: User = 
         updated_task['start_date'] = datetime.fromisoformat(updated_task['start_date'])
     if updated_task.get('end_date') and isinstance(updated_task['end_date'], str):
         updated_task['end_date'] = datetime.fromisoformat(updated_task['end_date'])
+    if updated_task.get('expected_completion_date') and isinstance(updated_task['expected_completion_date'], str):
+        updated_task['expected_completion_date'] = datetime.fromisoformat(updated_task['expected_completion_date'])
+    if updated_task.get('realized_completion_date') and isinstance(updated_task['realized_completion_date'], str):
+        updated_task['realized_completion_date'] = datetime.fromisoformat(updated_task['realized_completion_date'])
     
     return Task(**updated_task)
 
