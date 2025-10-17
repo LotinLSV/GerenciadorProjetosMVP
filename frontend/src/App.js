@@ -85,6 +85,14 @@ function App() {
             }
           />
           <Route
+            path="/tasks"
+            element={
+              <ProtectedRoute>
+                <TasksPage user={user} logout={logout} darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/admin"
             element={
               <ProtectedRoute>
